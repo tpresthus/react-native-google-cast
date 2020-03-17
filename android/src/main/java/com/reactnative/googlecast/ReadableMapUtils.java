@@ -4,6 +4,7 @@ import android.graphics.Color;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
 
 import java.util.Map;
@@ -32,6 +33,14 @@ public class ReadableMapUtils {
         }
 
         return innerMap.toHashMap();
+    }
+
+    public static @Nullable ReadableArray getArray(@NonNull ReadableMap map, @NonNull String key) {
+        if (!map.hasKey(key)) {
+            return null;
+        }
+
+        return map.getArray(key);
     }
 
     public static @Nullable Integer getInt(@NonNull ReadableMap map, @NonNull String key) {

@@ -12,6 +12,7 @@ import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
+import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.common.annotations.VisibleForTesting;
@@ -159,6 +160,31 @@ public class GoogleCastModule
                 remoteMediaClient.load(mediaInfo, true, seconds * 1000);
 
                 Log.e(REACT_CLASS, "Casting media... ");
+            }
+        });
+    }
+
+    @ReactMethod
+    public void setActiveMediaTracks(final ReadableArray params) {
+        if(mCastSession == null) {
+            return;
+        }
+
+        getReactApplicationContext().runOnUiQueueThread(new Runnable() {
+            @Override
+            public void run() {
+                RemoteMediaClient remoteMediaClient = mCastSession.getRemoteMediaClient();
+                if(remoteMediaClient == null) {
+                    return;
+                }
+
+                long[] ids = new long[params.size()];
+                for(int i=0; i<params.size(); i++)
+                    ids[i] = params.getInt(i);
+
+                remoteMediaClient.setActiveMediaTracks(ids);
+
+                Log.e(REACT_CLASS, "Setting active media tracks... ");
             }
         });
     }

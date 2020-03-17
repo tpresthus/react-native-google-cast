@@ -3,15 +3,19 @@ package com.reactnative.googlecast;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 
+import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
 import com.google.android.gms.cast.MediaInfo;
 import com.google.android.gms.cast.MediaMetadata;
+import com.google.android.gms.cast.MediaTrack;
 import com.google.android.gms.cast.TextTrackStyle;
 import com.google.android.gms.common.images.WebImage;
 
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class MediaInfoBuilder {
@@ -122,9 +126,95 @@ public class MediaInfoBuilder {
             builder = builder.setTextTrackStyle(buildTextTrackStyle(textTrackStyle));
         }
 
+        ReadableArray mediaTracks = ReadableMapUtils.getArray(parameters, "mediaTracks");
+        if(mediaTracks != null) {
+            builder = builder.setMediaTracks(buildMediaTracks(mediaTracks));
+        }
+
         return builder.build();
     }
 
+    private static List<MediaTrack> buildMediaTracks(final ReadableArray mediaTracks) {
+        List<MediaTrack> list = new ArrayList<>();
+
+        for(int i=0; i<mediaTracks.size(); i++)
+        {
+            list.add(buildMediaTrack(mediaTracks.getMap(i)));
+        }
+
+        return list;
+    }
+
+    private static @NonNull MediaTrack buildMediaTrack(final ReadableMap map)
+    {
+        int id = map.getInt("id");
+        int type = getType(map.getString("type"));
+
+        MediaTrack.Builder builder = new MediaTrack.Builder(id, type);
+
+        if(map.hasKey("name")) {
+            builder.setName(map.getString("name"));
+        }
+        if (map.hasKey("contentId")) {
+            builder.setContentId(map.getString("contentId"));
+        }
+        if (map.hasKey("contentType")) {
+            builder.setContentType(map.getString("contentType"));
+        }
+        if (map.hasKey("languageCode")) {
+            builder.setLanguage(map.getString("languageCode"));
+        }
+        if (map.hasKey("subtype")) {
+            builder.setSubtype(getSubtype(map.getString("subtype")));
+        }
+
+        return builder.build();
+    }
+
+    private static int getType(String type)
+    {
+        switch (type.toLowerCase())
+        {
+            case "text":
+                return MediaTrack.TYPE_TEXT;
+
+            case "audio":
+                return MediaTrack.TYPE_AUDIO;
+
+            case "video":
+                return MediaTrack.TYPE_VIDEO;
+
+            default:
+                return MediaTrack.TYPE_UNKNOWN;
+        }
+    }
+
+    private static int getSubtype(String subtype)
+    {
+        switch(subtype.toLowerCase())
+        {
+            case "none":
+                return MediaTrack.SUBTYPE_NONE;
+
+            case "subtitles":
+                return MediaTrack.SUBTYPE_SUBTITLES;
+
+            case "captions":
+                return MediaTrack.SUBTYPE_CAPTIONS;
+
+            case "descriptions":
+                return MediaTrack.SUBTYPE_DESCRIPTIONS;
+
+            case "chapters":
+                return MediaTrack.SUBTYPE_CHAPTERS;
+
+            case "metadata":
+                return MediaTrack.SUBTYPE_METADATA;
+
+            default:
+                return MediaTrack.SUBTYPE_UNKNOWN;
+        }
+    }
     private static TextTrackStyle buildTextTrackStyle(ReadableMap params) {
         TextTrackStyle style = new TextTrackStyle();
 
