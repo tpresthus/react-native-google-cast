@@ -450,12 +450,31 @@ public class GoogleCastModule
                         ) &&
                         track.getLanguage().equals(languageToSelect)
                     ) {
-                        client.setActiveMediaTracks(new long[]{ track.getId() });
+                        Log.i(REACT_CLASS, "Setting active track: " + track.getLanguage() + " " + track.getName() + " " + track.getId());
+
+                        client.setActiveMediaTracks(new long[]{ track.getId() })
+                                .setResultCallback(new ResultCallback<RemoteMediaClient.MediaChannelResult>() {
+                                    @Override
+                                    public void onResult(@NonNull RemoteMediaClient.MediaChannelResult mediaChannelResult) {
+                                        logSetActiveMediaTrackResult(mediaChannelResult);
+                                    }
+                                });
                         return;
                     }
                 }
             }
         });
+    }
+
+    private static void logSetActiveMediaTrackResult(RemoteMediaClient.MediaChannelResult mediaChannelResult) {
+        if(mediaChannelResult.getStatus().isSuccess()) {
+            Log.i(REACT_CLASS, "Successfully set status!");
+        } else {
+            Status status = mediaChannelResult.getStatus();
+            String statusMessage = status.getStatusMessage();
+            int statusCode = status.getStatusCode();
+            Log.e(REACT_CLASS, "Failed with status code:" + statusCode + ", message: " + statusMessage);
+        }
     }
 
     private void setupCastListener() {
