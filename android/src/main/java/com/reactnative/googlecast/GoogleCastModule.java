@@ -20,6 +20,7 @@ import com.facebook.react.modules.core.DeviceEventManagerModule;
 import com.google.android.gms.cast.Cast;
 import com.google.android.gms.cast.CastDevice;
 import com.google.android.gms.cast.MediaInfo;
+import com.google.android.gms.cast.MediaMetadata;
 import com.google.android.gms.cast.MediaStatus;
 import com.google.android.gms.cast.MediaTrack;
 import com.google.android.gms.cast.framework.CastContext;
@@ -31,6 +32,8 @@ import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.common.images.WebImage;
 import com.reactnative.googlecast.GoogleCastButtonManager;
+
+import org.json.JSONException;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -233,7 +236,54 @@ public class GoogleCastModule
         });
     }
 
+    @ReactMethod
+    public void getMediaInfo(final Promise promise) {
+        getReactApplicationContext().runOnUiQueueThread(new Runnable() {
+            @Override
+            public void run() {
+                if(CAST_AVAILABLE) {
+                    RemoteMediaClient remoteMediaClient = mCastSession.getRemoteMediaClient();
+                    MediaInfo mediaInfo = remoteMediaClient.getMediaInfo();
 
+                    if(mediaInfo == null) {
+                        promise.reject("E_MEDIA_INFO_UNAVAILABLE", "No mediaInfo present");
+                        return;
+                    }
+
+                    try {
+                        WritableMap map = WritableMapUtils.convertJsonToMap(mediaInfo.toJson());
+                        promise.resolve(map);
+                    } catch (JSONException e) {
+                        Log.e(REACT_CLASS, e.getMessage(), e);
+                        promise.reject(e);
+                    }
+
+                    /*
+                    WritableMap map = Arguments.createMap();
+
+                    String title = mediaInfo.getMetadata().getString(MediaMetadata.KEY_TITLE);
+                    String subtitle = mediaInfo.getMetadata().getString(MediaMetadata.KEY_SUBTITLE);
+
+                    for(WebImage image : mediaInfo.getMetadata().getImages()) {
+
+                    }
+
+                    try {
+                        WritableMap customData = WritableMapUtils.convertJsonToMap(mediaInfo.getCustomData());
+                        map.putMap("customData", customData);
+                    } catch (JSONException e) {
+                        Log.e(REACT_CLASS, e.getMessage(), e);
+                    }
+
+                    promise.resolve(map);
+                    */
+
+                } else {
+                    promise.reject(E_CAST_NOT_AVAILABLE, GOOGLE_CAST_NOT_AVAILABLE_MESSAGE);
+                }
+            }
+        });
+    }
     @ReactMethod
     public void initChannel(final String namespace, final Promise promise) {
         if (mCastSession != null) {

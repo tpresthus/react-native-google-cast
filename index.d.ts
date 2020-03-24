@@ -15,6 +15,30 @@ declare module 'react-native-google-cast' {
     | 'Connecting'
     | 'Connected'
 
+  export type MediaTrack = {
+    trackId: number,
+    type: 'TEXT' | 'AUDIO' | 'VIDEO',
+    trackContentId?: string,
+    trackContentType?: string,
+    name?: string,
+    language?: string,
+    subtype: 'SUBTITLES' | 'CAPTIONS' | 'DESCRIPTIONS' | 'CHAPTERS' | 'METADATA',
+    customData?: Object
+  }
+
+  export type MediaInfo = {
+    contentId: string,
+    streamType: 'BUFFERED' | 'LIVE' | 'NONE',
+    contentType?: string,
+    duration: number,
+    customData?: Object,
+    entity?: string,
+
+    metadata?: Object, // TODO: Create type
+    tracks?: MediaTrack[],
+    textTrackStyle?: TextTrackStyle
+  }
+
   export type CastOptions = {
     mediaUrl: string
     title?: string
@@ -54,6 +78,7 @@ declare module 'react-native-google-cast' {
   const GoogleCast: {
     getCastDevice(): Promise<CastDevice>
     getCastState(): Promise<CastState>
+    getMediaInfo(): Promise<MediaInfo>
     castMedia(options: CastOptions): void
     endSession(stopCast?: boolean): Promise<boolean>
     play(): void

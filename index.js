@@ -19,6 +19,30 @@ type CastDevice = {
   model: string,
 }
 
+type MediaTrack = {
+  trackId: number,
+  type: 'TEXT' | 'AUDIO' | 'VIDEO',
+  trackContentId?: string,
+  trackContentType?: string,
+  name?: string,
+  language?: string,
+  subtype: 'SUBTITLES' | 'CAPTIONS' | 'DESCRIPTIONS' | 'CHAPTERS' | 'METADATA',
+  customData?: Object
+}
+
+type MediaInfo = {
+  contentId: string,
+  streamType: 'BUFFERED' | 'LIVE' | 'NONE',
+  contentType?: string,
+  duration: number,
+  customData?: Object,
+  entity?: string,
+
+  metadata?: Object, // TODO: Create type
+  tracks?: MediaTrack[],
+  textTrackStyle?: TextTrackStyle
+}
+
 type CastState =
   | 'NoDevicesAvailable'
   | 'NotConnected'
@@ -57,6 +81,9 @@ export default {
           state
         ],
     )
+  },
+  getMediaInfo(): Promise<MediaInfo> {
+    return GoogleCast.getMediaInfo()
   },
   castMedia(params: {
     mediaUrl: string,
